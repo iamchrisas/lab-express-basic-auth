@@ -1,12 +1,24 @@
 const { Schema, model } = require("mongoose");
+const bcrypt = require('bcryptjs');
 
-// TODO: Please make sure you edit the user model to whatever makes sense in this case
 const userSchema = new Schema({
   username: {
     type: String,
-    unique: true
+    unique: true,
+    required: true
   },
-  password: String
+  password: {
+    type: String,
+    required: true
+  }
+});
+
+userSchema.pre('save', async function(next) {
+  const user = this;
+  if (user.isModified('password')) {
+    user.password = await bcrypt.hash(user.password, 10);
+  }
+  next();
 });
 
 const User = model("User", userSchema);
